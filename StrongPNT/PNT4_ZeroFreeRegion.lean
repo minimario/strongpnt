@@ -558,7 +558,8 @@ lemma lem_explicit1deltat :
     simpa [norm_sub_comm', hFinset_eq]
       using this
   -- Control the logarithmic factor
-  have hc_ne : riemannZeta c_std ≠ 0 := by simpa [c_std] using zetacnot0 t
+  have hc_ne : riemannZeta c_std ≠ 0 := by
+    simpa [c_std] using zetacnot0 t (by simpa using ht)
   have hnorm_pos : 0 < ‖riemannZeta c_std‖ := by simpa [norm_pos_iff] using hc_ne
   have hnorm_ne : ‖riemannZeta c_std‖ ≠ 0 := ne_of_gt hnorm_pos
   have hb_ne : b ≠ 0 := ne_of_gt hbpos
@@ -4153,7 +4154,8 @@ lemma lem_m_rho_zeta_nat (t : ℝ) (ht : |t| > 3) (ρ : ℂ) :
     have hc_ne_one : c ≠ (1 : ℂ) := (D1cinTt_pre t ht1) c hc_in_ball1
     have hc_in_S : c ∈ {s : ℂ | s ≠ 1} := by simpa [Set.mem_setOf_eq] using hc_ne_one
     have hζc_zero : riemannZeta c = 0 := h_zero_on_S hc_in_S
-    exact (zetacnot0 t) hζc_zero
+    have ht2 : |t| > 2 := lt_trans (by norm_num) ht
+    exact (zetacnot0 t ht2) hζc_zero
   -- Therefore the order is finite (not top)
   have hfinite : analyticOrderAt riemannZeta ρ ≠ ⊤ := by
     intro htop
@@ -4836,10 +4838,10 @@ lemma lem_sum_m_rho_zeta :
     intro z hz
     have hz_ne_one : z ≠ (1 : ℂ) := (D1cinTt_pre t ht1) z (by simpa [c] using hz)
     exact zetaanalOnnot1 z hz_ne_one
-  -- Nonzero at center
-  have h_nonzero : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t
-  -- Upper bound on |ζ| on closedBall c R with B = b * |t|
   have ht2 : |t| > 2 := by linarith
+  -- Nonzero at center
+  have h_nonzero : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t ht2
+  -- Upper bound on |ζ| on closedBall c R with B = b * |t|
   have h_upper_on_ball1 : ∀ z ∈ Metric.closedBall c 1, ‖riemannZeta z‖ < b * |t| := by
     have h := hb_bound t ht2
     intro z hz; simpa [c] using h z (by simpa [c] using hz)

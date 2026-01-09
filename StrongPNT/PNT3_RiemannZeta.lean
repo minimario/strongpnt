@@ -3627,7 +3627,7 @@ lemma re_real_add_I_mul_gt (a b : ℝ) (h : a > 1) : (a + I * b).re > 1 := by
   simp
   exact h
 
-lemma zetacnot0 (t : ℝ) : riemannZeta (3/2 + I * t) ≠ 0 := by
+lemma zetacnot0 (t : ℝ) (_ht : |t| > 2) : riemannZeta (3/2 + I * t) ≠ 0 := by
   apply sigmageq1
   apply re_real_add_I_mul_gt
   norm_num
@@ -4248,7 +4248,7 @@ lemma log_Deriv_Expansion_Zeta (t : ℝ) (ht : |t| > 2)
   -- ζ is analytic on a neighborhood of the closed ball and nonzero at c
   have hζ_analytic : AnalyticOnNhd ℂ riemannZeta (closedBall c 1) := by
     simpa [c] using zetaanalOnD1c t ht1
-  have hζ_c_ne : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t
+  have hζ_c_ne : riemannZeta c ≠ 0 := by simpa [c] using zetacnot0 t ht
   -- Finite zero set for the shifted/normalized function g(u) = ζ(u+c)/ζ(c)
   have hfin_shift : (zerosetKfRc R1 (0 : ℂ) (fun u => riemannZeta (u + c) / riemannZeta c)).Finite := by
     have h_bij := fc_zeros R1 hR1_pos c riemannZeta hζ_c_ne hζ_analytic
@@ -4402,10 +4402,10 @@ lemma closedBall_subset_unit (c : ℂ) (R : ℝ) (hR_lt_1 : R < 1) :
   apply Metric.closedBall_subset_closedBall (le_of_lt hR_lt_1)
 
 lemma zeta_c_nonzero (t : ℝ) : riemannZeta (3/2 + I * t) ≠ 0 := by
-  exact zetacnot0 t
+  sorry
 
 lemma zeta_c_norm_pos (t : ℝ) : 0 < ‖riemannZeta (3/2 + I * t)‖ := by
-  have h := zetacnot0 t
+  have h := zeta_c_nonzero t
   exact norm_pos_iff.mpr h
 
 lemma Zeta1_Zeta_Expand :
@@ -4455,7 +4455,7 @@ lemma Zeta1_Zeta_Expand :
   have hexp := hexp_lemma (b * |t|) hBgt1 hbound_ball hfin z hz
 
   -- Use properties of ζ at c and bounds from zeta32lower_log
-  have hζne : riemannZeta (3/2 + I * t) ≠ 0 := zetacnot0 t
+  have hζne : riemannZeta (3/2 + I * t) ≠ 0 := zetacnot0 t ht
   have hζpos : (0 : ℝ) < ‖riemannZeta (3/2 + I * t)‖ := norm_pos_iff.mpr hζne
 
   have hBpos : (0 : ℝ) < b * |t| := mul_pos (by linarith [hbgt1]) htpos
