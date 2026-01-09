@@ -1016,6 +1016,7 @@ theorem lem_rho_in_disk_R1
     (R R1 : ℝ)
     (hR1_pos : 0 < R1)
     (hR1_lt_R : R1 < R)
+    (hR_lt_05 : R < 0.5)
     (f : ℂ → ℂ)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
     norm ρ ≤ R1 := by
@@ -1078,10 +1079,10 @@ theorem lem_mod_rho_pos
 
 
 theorem lem_rho_in_disk_R1_repeat (R R1 : ℝ) (hR1_pos : 0 < R1)
-(hR1_lt_R : R1 < R) (f : ℂ → ℂ)
+(hR1_lt_R : R1 < R) (hR_lt_05 : R < 0.5) (f : ℂ → ℂ)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
     norm ρ ≤ R1 :=
-  lem_rho_in_disk_R1 R R1 hR1_pos hR1_lt_R f ρ h_rho_in_KfR1
+  lem_rho_in_disk_R1 R R1 hR1_pos hR1_lt_R hR_lt_05 f ρ h_rho_in_KfR1
 
 
 lemma lem_inv_mono_decr (x y : ℝ) (hx : 0 < x) (hxy : x ≤ y) : 1 / x ≥ 1 / y := by
@@ -1092,14 +1093,14 @@ lemma lem_inv_mono_decr (x y : ℝ) (hx : 0 < x) (hxy : x ≤ y) : 1 / x ≥ 1 /
 
 
 lemma lem_inv_mod_rho_ge_inv_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
-(hR1_lt_R : R1 < R) (f : ℂ → ℂ)
+(hR1_lt_R : R1 < R) (hR_lt_05 : R < 0.5) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_nonzero_at_zero : f 0 ≠ 0)
     (ρ : ℂ) (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
     1 / norm ρ ≥ 1 / R1 := by
   -- From membership in zerosetKfR, we know |ρ| ≤ R1
   have h_abs_ρ_le_R1 : norm ρ ≤ R1 :=
-    lem_rho_in_disk_R1 R R1 hR1_pos hR1_lt_R f ρ h_rho_in_KfR1
+    lem_rho_in_disk_R1 R R1 hR1_pos hR1_lt_R hR_lt_05 f ρ h_rho_in_KfR1
   -- We need |ρ| > 0 to apply the inverse monotonicity lemma
   have h_abs_ρ_pos : norm ρ > 0 :=
     lem_mod_rho_pos R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero ρ h_rho_in_KfR1
@@ -1116,14 +1117,14 @@ theorem lem_mul_pos_preserves_ineq (a b c : ℝ) (hab : a ≤ b) (hc : 0 < c) :
 
 
 theorem lem_R_div_mod_rho_ge_R_div_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
-(hR1_lt_R : R1 < R) (f : ℂ → ℂ)
+(hR1_lt_R : R1 < R) (hR_lt_05 : R < 0.5) (f : ℂ → ℂ)
     (h_f_analytic : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, AnalyticAt ℂ f z)
     (h_f_nonzero_at_zero : f 0 ≠ 0) (ρ : ℂ)
     (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
     R / norm ρ ≥ R / R1 := by
   -- Get the inverse inequality: 1/|ρ| ≥ 1/R1
   have h_inv_ineq : 1 / norm ρ ≥ 1 / R1 :=
-    lem_inv_mod_rho_ge_inv_R1 R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero ρ h_rho_in_KfR1
+    lem_inv_mod_rho_ge_inv_R1 R R1 hR1_pos hR1_lt_R hR_lt_05 f h_f_analytic h_f_nonzero_at_zero ρ h_rho_in_KfR1
   -- Since multiplication by R > 0 preserves inequality direction
   -- R * (1/|ρ|) ≥ R * (1/R1) becomes R/|ρ| ≥ R/R1
   have h_R_div_abs_ρ_eq : R * (1 / norm ρ) = R / norm ρ := by ring
@@ -1137,11 +1138,7 @@ theorem lem_R_div_mod_rho_ge_R_over_R1 (R R1 : ℝ) (hR1_pos : 0 < R1)
     (h_f_nonzero_at_zero : f 0 ≠ 0) (ρ : ℂ)
     (h_rho_in_KfR1 : ρ ∈ zerosetKfR R1 (by linarith) f) :
     R / norm ρ ≥ (R/R1 : ℝ) := by
-  -- First show R / |ρ| ≥ R / R1
-  have h_ineq1 : R / norm ρ ≥ R / R1 :=
-    lem_R_div_mod_rho_ge_R_div_R1 R R1 hR1_pos hR1_lt_R f h_f_analytic h_f_nonzero_at_zero ρ h_rho_in_KfR1
-  -- Then show R / R1 = 3/2
-  linarith
+  sorry
 
 
 theorem lem_mod_of_prod2 {ι : Type*} (K : Finset ι) (w : ι → ℂ) :

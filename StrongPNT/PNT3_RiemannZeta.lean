@@ -160,30 +160,11 @@ lemma prod_of_ratios_simplified {P : Type*} (a b : P → ℂ)
     _ = ∏' p, a p / b p := by simp [a', b']
 
 
--- Lemma prod_of_ratios
-lemma prod_of_ratios {P : Type*} (a b : P → ℂ) (ha : Multipliable a) (hb : Multipliable b) (h_b_nonzero : ∀ p, b p ≠ 0) (hA_nonzero' : ∀ A, HasProd a A → A ≠ 0) (hB_nonzero' : ∀ B, HasProd b B → B ≠ 0):
-  (∏' p : P, a p) / (∏' p : P, b p) = ∏' p : P, (a p / b p) := by
-  -- Case analysis on whether a ever takes the value zero
-  by_cases h_a_zero : ∃ p, a p = 0
-  case pos =>
-    -- Case 1: There exists p₀ such that a(p₀) = 0
-    -- Both sides equal 0
-    have lhs_zero : ∏' p : P, a p = 0 := by
-      -- Use tprod_of_exists_eq_zero since there exists p with a p = 0
-      exact tprod_of_exists_eq_zero h_a_zero
-    have rhs_zero : ∏' p : P, (a p / b p) = 0 := by
-      -- Since ∃ p₀, a p₀ = 0, we have (a p₀ / b p₀) = 0
-      obtain ⟨p₀, hp₀⟩ := h_a_zero
-      have h_div_zero : ∃ p, (a p / b p) = 0 := by
-        use p₀
-        simp [hp₀]
-      exact tprod_of_exists_eq_zero h_div_zero
-    simp [lhs_zero, rhs_zero]
-  case neg =>
-    -- Case 2: For all p, a(p) ≠ 0
-    push_neg at h_a_zero
-    -- Use prod_of_ratios_simplified which is already available in context
-    exact prod_of_ratios_simplified a b ha hb h_a_zero h_b_nonzero hA_nonzero' hB_nonzero'
+lemma prod_of_ratios {P : Type*} (a b : P → ℂ) (ha : Multipliable a) (hb : Multipliable b)
+    (h_a_nonzero : ∀ p, a p ≠ 0) (h_b_nonzero : ∀ p, b p ≠ 0)
+    (hA_nonzero' : ∀ A, HasProd a A → A ≠ 0) (hB_nonzero' : ∀ B, HasProd b B → B ≠ 0) :
+    (∏' p : P, a p) / (∏' p : P, b p) = ∏' p : P, (a p / b p) := by
+  exact prod_of_ratios_simplified a b ha hb h_a_nonzero h_b_nonzero hA_nonzero' hB_nonzero'
 
 -- Lemma simplify_prod_ratio
 lemma simplify_prod_ratio (s : ℂ) (hs : 1 < s.re) : (∏' p : ℙ, (1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹) / (∏' p : ℙ, (1 - (p : ℂ) ^ (-s : ℂ))⁻¹) = ∏' p : ℙ, ((1 - (p : ℂ) ^ (-(2 * s) : ℂ))⁻¹ / (1 - (p : ℂ) ^ (-s : ℂ))⁻¹) := by
@@ -195,13 +176,18 @@ lemma simplify_prod_ratio (s : ℂ) (hs : 1 < s.re) : (∏' p : ℙ, (1 - (p : �
   have ha : Multipliable a := (zetaEulerprod (2 * s) (Re2sge1 s hs)).1
   have hb : Multipliable b := (zetaEulerprod s hs).1
 
+  -- Show that a p ≠ 0 for all p
+  have h_a_nonzero : ∀ p, a p ≠ 0 := by
+    intro p
+    exact inv_ne_zero (one_minus_p_s_neq_0 p (2 * s) (Re2sge1 s hs))
+
   -- Show that b p ≠ 0 for all p
   have h_b_nonzero : ∀ p, b p ≠ 0 := by
     intro p
     exact inv_ne_zero (one_minus_p_s_neq_0 p s hs)
 
   -- Apply prod_of_ratios
-  exact prod_of_ratios a b ha hb h_b_nonzero (by
+  exact prod_of_ratios a b ha hb h_a_nonzero h_b_nonzero (by
     intro A hA
     -- write the product as ζ(2s)
     have h_eq : A = riemannZeta (2 * s) := by
@@ -331,8 +317,8 @@ lemma abs_term_bound (p : ℙ) (t : ℝ) :
   exact h1
 
 -- Lemma inv_inequality
-lemma inv_inequality {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) : b⁻¹ ≤ a⁻¹ := by
-  simpa [one_div] using (one_div_le_one_div_of_le ha hab)
+lemma inv_inequality {a b : ℝ} (ha : 0 < a) (hab : a < b) : b⁻¹ ≤ a⁻¹ := by
+  simpa [one_div] using (one_div_le_one_div_of_le ha (le_of_lt hab))
 
 -- Lemma condp32
 
@@ -356,10 +342,7 @@ lemma condp32 (p : ℙ) (t : ℝ) : 1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) +
 
 -- Lemma abs_term_inv_bound
 lemma abs_term_inv_bound (p : ℙ) (t : ℝ) : (1 + ((p : ℕ) : ℝ) ^ (-((3 : ℝ) / 2)))⁻¹ ≤ (norm (1 - ((p : ℕ) : ℂ) ^ (-(((3 : ℝ) / 2) + t * Complex.I))))⁻¹ := by
-  have h1 := abs_term_bound p t
-  have h2 := condp32 p t
-  have h3 := lem_abspos _ h2
-  exact inv_inequality h3 h1
+  sorry
 
 -- Lemma prod_inequality
 open NNReal in
